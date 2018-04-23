@@ -11,7 +11,7 @@ $wc.DownloadFile($downloadURI, $downloadFile)
 
 
 # Load from CSV into staging table
-Import-DbaCsvToSql -Csv $downloadFile -SqlInstance 1InstanceName -Database TowedVehicles -Table TowedVehiclesSTG `
+Import-DbaCsvToSql -Csv $downloadFile -SqlInstance InstanceName -Database TowedVehicles -Table TowedVehiclesSTG `
 -Truncate -FirstRowColumns
 
 
@@ -33,7 +33,7 @@ FROM (
 	SELECT
 		s.*,
 		ROW_NUMBER() OVER (PARTITION BY s.ID ORDER BY s.ID) AS n
-	FROM [dbo].[TowedVehiclesStgNative] s
+	FROM [dbo].[TowedVehiclesSTG] s
 	LEFT JOIN [dbo].[TowedVehicles] v ON s.ID = v.ID
 	WHERE v.ID IS NULL
 ) a
