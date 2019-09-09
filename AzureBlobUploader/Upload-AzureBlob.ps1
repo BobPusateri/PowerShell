@@ -28,7 +28,7 @@ BEGIN {
 		Write-Error "Files to upload do not exist: `n$errstr" 
 	}
 	
-	$StorageAccountContext = New-AzureStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $StorageAccountKey
+	$StorageAccountContext = New-AzStorageContext -StorageAccountName $StorageAccountName -StorageAccountKey $StorageAccountKey
 	
 }
 PROCESS {
@@ -39,16 +39,14 @@ PROCESS {
 		write-host "copying $fileName to $blobName"
 		
 		# upload file
-		$blobResult = Set-AzureStorageBlobContent -File $singleFile -Container $containerName -Blob $blobName `
-			-Context $storageAccountContext -ConcurrentTaskCount $ConcurrentTasks
+		$blobResult = Set-AzStorageBlobContent -File $singleFile -Container $containerName -Blob $blobName `
+			-Context $storageAccountContext -ConcurrentTaskCount $ConcurrentTasks -StandardBlobTier $BlobTier
 	
-		if($blobResult -ne $null) {
-			# if file uploaded correctly, change to specified tier
-			$blobResult.ICloudBlob.SetStandardBlobTier($BlobTier)
-			Get-AzureStorageBlob -Container $containerName -Blob $blobName -Context $storageAccountContext | Format-List
+		if($null -ne $blobResult) {
+			Get-AzStorageBlob -Container $containerName -Blob $blobName -Context $storageAccountContext | Format-List
 		} else {
 			# if file didn't upload, throw error
-			Write-Error "Upload of $fileName failed."
+			throw "Upload of $fileName failed."
 		}
 	} #foreach
 }
